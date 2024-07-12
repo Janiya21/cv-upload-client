@@ -1,0 +1,59 @@
+// applicants
+
+{
+    "_id": {
+        "$oid": "6683c9163c309f560628839c"
+    },
+    "email": "janith@ewbholdings.com",
+    "firstName": "Janith",
+    "lastName": "Sandaru",
+    "location": "Colombo",
+    "phoneNo": "0788027182",
+    "vacancies": [
+        {
+            "$oid": "66812f1bc39edd76fa1f9f58"
+        },
+        {
+            "$oid": "66813003c39edd76fa1f9f59"
+        }
+    ],
+    "cv": "example.pdf"
+}
+
+
+// positions
+
+{
+    "_id": {
+        "$oid": "668104bfe05bce943ff72896"
+    },
+    "name": "Associate Software Engineer",
+    "description": "ASE FE/BE Description",
+    "status": "active"
+}
+
+
+// vacancies
+
+{
+    "_id": {
+        "$oid": "66813003c39edd76fa1f9f59"
+    },
+    "status": "active",
+    "createDate": "06/30/2024",
+    "description": "<ol><li><strong aria-hidden=\"true\">Test Description 01</strong></li><li><strong aria-hidden=\"true\">Test Description 10</strong></li></ol>",
+    "title": "sub desc sE",
+    "position": {
+        "$oid": "668104bfe05bce943ff72896"
+    },
+    "endDate": "7/17/2024",
+    "location": [
+        "Kandy",
+        "Galle"
+    ],
+    "applicants": [
+        {
+            "$oid": "6683c9163c309f560628839c"
+        }
+    ]
+}
