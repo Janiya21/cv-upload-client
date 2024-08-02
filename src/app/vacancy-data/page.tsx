@@ -50,6 +50,7 @@ const DetailPage = (context: any) => {
     location: "",
     file: null,
   });
+  const maxSize = 3 * 1024 * 1024;
 
   const [formErrors, setFormErrors] = useState({
     firstName: "",
@@ -61,11 +62,13 @@ const DetailPage = (context: any) => {
     file: "",
   });
 
+  const [fileSize, setFileSize] = useState(null);
+
   useEffect(() => {
     const fetchVacancy = async () => {
       if (vacancyId) {
         try {
-          const response = await fetch(process.env.NEXT_PUBLIC_BASE_URL+`/api/vacancy/${vacancyId}?id=${vacancyId}`);
+          const response = await fetch(process.env.NEXT_PUBLIC_BASE_URL + `/api/vacancy/${vacancyId}?id=${vacancyId}`);
           if (!response.ok) {
             toast({
               description: "Failed to fetch Vacancy Data!",
@@ -116,7 +119,7 @@ const DetailPage = (context: any) => {
           }
         });
 
-        const response = await fetch(process.env.NEXT_PUBLIC_BASE_URL+"/api/applicant", {
+        const response = await fetch(process.env.NEXT_PUBLIC_BASE_URL + "/api/applicant", {
           method: "POST",
           body: formDataToSend,
         });
@@ -144,11 +147,11 @@ const DetailPage = (context: any) => {
         console.log(data.get('text'));
 
         try {
-          const response = await fetch(process.env.NEXT_PUBLIC_BASE_URL+'/api/send-email', {
+          const response = await fetch(process.env.NEXT_PUBLIC_BASE_URL + '/api/send-email', {
             method: 'POST',
             body: data,
           });
-    
+
           if (response.ok) {
             toast({
               description: "You will receive an Email shortly!",
@@ -174,12 +177,24 @@ const DetailPage = (context: any) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement> | any) => {
     const { name, value, files } = e.target;
     if (name === 'file' && files) {
-      console.log('File selected:', files[0]); // Log the selected file
+      const file = files[0];
+      if (file.size > maxSize) {
+        setFormErrors({ ...formErrors, file: 'File size exceeds maximum limit of 5MB' });
+        setFileSize(null);
+      } else {
+        setFormErrors({ ...formErrors, file: '' });
+        setFileSize(file.size);
+        setFormData({
+          ...formData,
+          [name]: file,
+        });
+      }
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
     }
-    setFormData({
-      ...formData,
-      [name]: files ? files[0] : value,
-    });
   };
 
   const handleSelectChange = (value: string) => {
@@ -320,14 +335,18 @@ const DetailPage = (context: any) => {
                             {formErrors.location && <p className="text-red-500 text-xs">{formErrors.location}</p>}
                             <label className="block text-sm font-medium text-gray-400 mt-2 ms-2">Resume (PDF)</label>
                             <input
-                                type="file"
-                                name="file"
-                                onChange={handleChange}
-                                className={`mt-1 ms-2 block w-full bg-gray-100 text-gray-400 ${
-                                  formErrors.file ? "border-red-500 ms-2" : "ms-2"
+                              type="file"
+                              name="file"
+                              onChange={handleChange}
+                              className={`mt-1 ms-2 block w-full bg-gray-100 text-gray-400 ${formErrors.file ? "border-red-500 ms-2" : "ms-2"
                                 }`}
-                              />
+                            />
                             {formErrors.file && <p className="text-red-500  text-xs">{formErrors.file}</p>}
+                            {fileSize !== null && (
+                              <p className="text-gray-500 text-sm ms-2">
+                                File size: {(fileSize / 1024 / 1024).toFixed(2)} MB
+                              </p>
+                            )}
                           </div>
                           <div className="flex justify-end">
                             <Button variant="ghost" color="success" className="my-2 me-2 text-green-500 " type="submit" isDisabled={isSubmitting}>

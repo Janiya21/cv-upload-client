@@ -23,24 +23,24 @@ interface FormData {
 }
 
 const customStyles = {
-  control: (provided:any) => ({
+  control: (provided: any) => ({
     ...provided,
     minHeight: '40px',
   }),
-  menu: (provided:any) => ({
+  menu: (provided: any) => ({
     ...provided,
     backgroundColor: '#f0f0f0', // Change to your desired background color
     zIndex: 9999, // Ensure the menu is displayed above other elements
   }),
-  menuList: (provided:any) => ({
+  menuList: (provided: any) => ({
     ...provided,
     backgroundColor: '#f0f0f0', // Change to your desired background color
   }),
-  valueContainer: (provided:any) => ({
+  valueContainer: (provided: any) => ({
     ...provided,
     minHeight: '40px',
   }),
-  input: (provided:any) => ({
+  input: (provided: any) => ({
     ...provided,
     minHeight: '40px',
   }),
@@ -68,6 +68,10 @@ const ApplyVacancy = () => {
     position: "",
     file: "",
   });
+
+  const [fileSize, setFileSize] = useState(null);
+
+  const maxSize = 3 * 1024 * 1024;
 
   const [positions, setPositions] = useState<Option[]>([]);
   const { toast } = useToast();
@@ -189,22 +193,26 @@ const ApplyVacancy = () => {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-
-    if (e.target instanceof HTMLInputElement) {
-      if (e.target.type === "file") {
-        const file = e.target.files ? e.target.files[0] : null;
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement> | any) => {
+    const { name, value, files } = e.target;
+    if (name === 'file' && files) {
+      const file = files[0];
+      if (file.size > maxSize) {
+        setFormErrors({ ...formErrors, file: 'File size exceeds maximum limit of 5MB' });
+        setFileSize(null);
+      } else {
+        setFormErrors({ ...formErrors, file: '' });
+        setFileSize(file.size);
         setFormData({
           ...formData,
           [name]: file,
         });
-      } else {
-        setFormData({
-          ...formData,
-          [name]: value,
-        });
       }
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
     }
   };
 
@@ -296,7 +304,7 @@ const ApplyVacancy = () => {
               </div>
               <div className="mb-1">
                 <Select
-                   styles={customStyles}
+                  styles={customStyles}
                   options={positions}
                   className="z-40"
                   placeholder="Select a Position"
@@ -309,7 +317,7 @@ const ApplyVacancy = () => {
               </div>
               <div className="mb-1">
                 <Select
-                 styles={customStyles}
+                  styles={customStyles}
                   className="z-30"
                   options={locationsData}
                   placeholder="Select a Location"
@@ -339,13 +347,17 @@ const ApplyVacancy = () => {
                 <input
                   type="file"
                   name="file"
-                  accept=".pdf"
                   onChange={handleChange}
-                  className={`mt-1 block w-full border-green-300 bg-gray-50 text-gray-400 ${formErrors.file ? "border-red-500" : ""
+                  className={`mt-1 ms-2 block w-full bg-gray-100 text-gray-400 ${formErrors.file ? "border-red-500 ms-2" : "ms-2"
                     }`}
                 />
                 {formErrors.file && (
                   <p className="mt-1 text-sm text-red-500">{formErrors.file}</p>
+                )}
+                {fileSize !== null && (
+                  <p className="text-gray-500 text-sm ms-2">
+                    File size: {(fileSize / 1024 / 1024).toFixed(2)} MB
+                  </p>
                 )}
               </div>
             </div>
